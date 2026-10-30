@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pannello Progetti</title>
+<style>
+:root{--bg:#050a14;--panel:rgba(14,24,44,.75);--text:#e6f1ff;--mute:#7d93b5;--cyan:#22d3ee;--vio:#a78bfa;--grn:#34d399;--line:rgba(34,211,238,.25);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050a14}}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,Arial,sans-serif;min-height:100vh;overflow-x:hidden}
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+.grid{position:fixed;inset:0;z-index:0;background:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:48px 48px;opacity:.25;animation:move 8s linear infinite;mask-image:radial-gradient(circle at 50% 30%,#000,transparent 75%)}
+@keyframes move{to{background-position:0 48px,48px 0}}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+h1{font-size:clamp(1.6rem,5vw,2.6rem);margin:0;letter-spacing:2px;background:linear-gradient(90deg,var(--cyan),var(--vio));-webkit-background-clip:text;background-clip:text;color:transparent;animation:glow 3s ease-in-out infinite}
+@keyframes glow{50%{filter:drop-shadow(0 0 12px var(--cyan))}}
+.sub{color:var(--mute);font-family:monospace;margin:6px 0 20px}
+.cur::after{content:"_";animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+input,select,textarea{background:rgba(5,10,20,.8);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:10px 12px;font:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(34,211,238,.4)}
+button{cursor:pointer;border:1px solid var(--cyan);background:rgba(34,211,238,.1);color:var(--cyan);border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;transition:.2s}
+button:hover{background:var(--cyan);color:#001018;box-shadow:0 0 18px var(--cyan)}
+button.sm{padding:5px 10px;font-size:.8rem}
+button.del{border-color:#f87171;color:#f87171;background:transparent}
+button.del:hover{background:#f87171;color:#190000;box-shadow:0 0 14px #f87171}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;backdrop-filter:blur(8px)}
+.stat b{display:block;font-size:1.7rem;color:var(--cyan)}
+.stat span{color:var(--mute);font-size:.8rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;backdrop-filter:blur(8px);overflow:hidden;animation:in .5s both;transition:.25s}
+.card:hover{transform:translateY(-4px);border-color:var(--cyan);box-shadow:0 0 24px rgba(34,211,238,.25)}
+.card::before{content:"";position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:scan 3.5s linear infinite}
+@keyframes scan{from{top:-2px}to{top:100%}}
+@keyframes in{from{opacity:0;transform:translateY(16px) scale(.97)}}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.card h3{margin:0;font-size:1.1rem}
+.tag{font-size:.7rem;font-family:monospace;padding:3px 8px;border-radius:99px;border:1px solid var(--vio);color:var(--vio);white-space:nowrap}
+.st{font-size:.75rem;font-family:monospace;margin:8px 0;color:var(--mute)}
+.st i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--cyan);animation:p 1.5s infinite}
+.st.fatto i{background:var(--grn);animation:none}.st.idea i{background:var(--vio)}
+@keyframes p{50%{opacity:.2;box-shadow:0 0 8px var(--cyan)}}
+.prog{height:8px;background:rgba(255,255,255,.08);border-radius:9px;overflow:hidden;margin:8px 0}
+.prog div{height:100%;background:linear-gradient(90deg,var(--cyan),var(--vio));transition:width .6s}
+.task{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.92rem}
+.task.d span{text-decoration:line-through;color:var(--mute)}
+.task input{accent-color:var(--cyan);padding:0;width:16px;height:16px}
+.task button{margin-left:auto;padding:0 8px;border:0;background:none;color:var(--mute)}
+.add{display:flex;gap:6px;margin-top:8px}.add input{flex:1;min-width:0;padding:7px 10px}
+.acts{display:flex;gap:6px;margin-top:12px}
+.note{color:var(--mute);font-size:.85rem;margin:6px 0}
+dialog{background:#0b1428;color:var(--text);border:1px solid var(--cyan);border-radius:16px;box-shadow:0 0 40px rgba(34,211,238,.35);width:min(440px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.65);backdrop-filter:blur(4px)}
+dialog label{display:block;font-size:.8rem;color:var(--mute);margin:10px 0 4px}
+dialog input,dialog select,dialog textarea{width:100%}
+.empty{text-align:center;color:var(--mute);padding:40px}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas><div class="grid"></div>
+<div class="wrap">
+  <h1>PANNELLO PROGETTI</h1>
+  <p class="sub"><span class="cur">sistema online · tutti i tuoi progetti in un posto</span></p>
+  <div class="stats" id="stats"></div>
+  <div class="bar">
+    <input id="q" placeholder="🔍 Cerca progetto..." style="flex:1;min-width:160px">
+    <select id="ft"><option value="">Tutti i tipi</option></select>
+    <button id="new">＋ Nuovo progetto</button>
+  </div>
+  <div class="cards" id="cards"></div>
+</div>
+<dialog id="dlg">
+  <form method="dialog" id="f" onsubmit="return false">
+    <h3 id="dt" style="margin-top:0;color:var(--cyan)">Nuovo progetto</h3>
+    <label>Nome</label><input id="fn" maxlength="60">
+    <label>Tipo</label><select id="ftp"></select>
+    <label>Stato</label><select id="fs"><option value="idea">💡 Idea</option><option value="corso">⚙️ In corso</option><option value="fatto">✅ Finito</option></select>
+    <label>Scadenza (opzionale)</label><input id="fd" type="date">
+    <label>Note</label><textarea id="fnote" rows="3"></textarea>
+    <div class="acts" style="justify-content:flex-end;margin-top:16px"><button type="button" id="cx">Annulla</button><button type="button" id="ok">Salva</button></div>
+  </form>
+</dialog>
+<script>
+const TIPI=["Bot Discord","Sito web","Video","Logo","App","Altro"];
+const KEY="pannello-progetti-v1";
+const seed=()=>[
+ {n:"Ultima Corsa – EH FILM",t:"Logo",s:"corso",d:"",note:"Logo quadrato per il film Roblox, anche icona Discord.",k:[["Scegliere stile",1],["Versione finale",0]]},
+ {n:"Jarvis",t:"Bot Discord",s:"corso",d:"",note:"Assistente stile Iron Man: Gmail, Discord, Telegram.",k:[["Notifiche Telegram",0],["Stato bot Discord",0]]},
+ {n:"Editor video AI",t:"App",s:"idea",d:"",note:"Carichi un video e l'AI lo edita da sola.",k:[]},
+ {n:"Video Monza RP",t:"Video",s:"corso",d:"",note:"Video da 1 minuto: rapina, fuga, tradimento.",k:[["Scaletta scene",0]]},
+ {n:"Video sponsor Mr Nexo",t:"Video",s:"corso",d:"",note:"Sponsor per lo streamer TikTok.",k:[]},
+ {n:"Sito Palermo RP",t:"Sito web",s:"corso",d:"",note:"Sito con logo scudo e cattedrale.",k:[["Home page",0],["Pagina regole",0]]}
+].map((p,i)=>({id:Date.now()+i,...p}));
+let P;
+try{P=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){P=null}
+if(!Array.isArray(P)||!P.length)P=seed();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SL={idea:"IDEA",corso:"IN CORSO",fatto:"FINITO"};
+TIPI.forEach(t=>{$("ft").add(new Option(t,t));$("ftp").add(new Option(t,t))});
+let editId=null;
+function pct(p){return p.k.length?Math.round(p.k.filter(x=>x[1]).length/p.k.length*100):(p.s==="fatto"?100:0)}
+function render(){
+  const q=$("q").value.toLowerCase(),f=$("ft").value;
+  const L=P.filter(p=>(!f||p.t===f)&&p.n.toLowerCase().includes(q));
+  const tot=P.length,run=P.filter(p=>p.s==="corso").length,done=P.filter(p=>p.s==="fatto").length;
+  const tasks=P.reduce((a,p)=>a+p.k.filter(x=>!x[1]).length,0);
+  $("stats").innerHTML=[[tot,"progetti"],[run,"in corso"],[done,"finiti"],[tasks,"cose da fare"]].map(x=>`<div class="stat"><b>${x[0]}</b><span>${x[1]}</span></div>`).join("");
+  $("cards").innerHTML=L.length?L.map((p,i)=>`<div class="card" style="animation-delay:${i*70}ms">
+   <div class="top"><h3>${esc(p.n)}</h3><span class="tag">${esc(p.t)}</span></div>
+   <div class="st ${p.s}"><i></i>${SL[p.s]}${p.d?" · scadenza "+p.d:""}</div>
+   ${p.note?`<div class="note">${esc(p.note)}</div>`:""}
+   <div class="prog"><div style="width:${pct(p)}%"></div></div><div class="note">${pct(p)}% completato</div>
+   ${p.k.map((x,j)=>`<div class="task ${x[1]?"d":""}"><input type="checkbox" ${x[1]?"checked":""} data-a="tg" data-i="${p.id}" data-j="${j}"><span>${esc(x[0])}</span><button data-a="rt" data-i="${p.id}" data-j="${j}">✕</button></div>`).join("")}
+   <div class="add"><input placeholder="Nuovo compito..." data-in="${p.id}"><button class="sm" data-a="at" data-i="${p.id}">＋</button></div>
+   <div class="acts"><button class="sm" data-a="ed" data-i="${p.id}">✏️ Modifica</button><button class="sm del" data-a="dl" data-i="${p.id}">🗑 Elimina</button></div>
+  </div>`).join(""):'<div class="empty">Nessun progetto trovato. Premi “Nuovo progetto”!</div>';
+}
+$("cards").addEventListener("click",e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;
+  const p=P.find(x=>x.id==b.dataset.i),a=b.dataset.a,j=+b.dataset.j;
+  if(a==="tg"){p.k[j][1]=p.k[j][1]?0:1;if(p.k.length&&p.k.every(x=>x[1]))p.s="fatto";else if(p.s==="fatto")p.s="corso"}
+  if(a==="rt")p.k.splice(j,1);
+  if(a==="at"){const i=document.querySelector(`[data-in="${p.id}"]`);if(!i.value.trim())return;p.k.push([i.value.trim(),0]);if(p.s==="fatto")p.s="corso"}
+  if(a==="dl"){if(!confirm("Eliminare questo progetto?"))return;P=P.filter(x=>x!==p)}
+  if(a==="ed"){openD(p);return}
+  save();render();
+});
+$("cards").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.dataset.in)document.querySelector(`[data-a="at"][data-i="${e.target.dataset.in}"]`).click()});
+function openD(p){
+  editId=p?p.id:null;$("dt").textContent=p?"Modifica progetto":"Nuovo progetto";
+  $("fn").value=p?p.n:"";$("ftp").value=p?p.t:TIPI[0];$("fs").value=p?p.s:"idea";$("fd").value=p?p.d:"";$("fnote").value=p?p.note:"";
+  $("dlg").showModal();
+}
+$("new").onclick=()=>openD(null);
+$("cx").onclick=()=>$("dlg").close();
+$("ok").onclick=()=>{
+  const n=$("fn").value.trim();if(!n){$("fn").focus();return}
+  const v={n,t:$("ftp").value,s:$("fs").value,d:$("fd").value,note:$("fnote").value.trim()};
+  if(editId){Object.assign(P.find(x=>x.id===editId),v)}else P.unshift({id:Date.now(),k:[],...v});
+  save();render();$("dlg").close();
+};
+$("q").oninput=render;$("ft").onchange=render;
+render();
+// sfondo animato: particelle collegate
+const c=$("fx"),x=c.getContext("2d");let W,H,pts=[];
+function rs(){W=c.width=innerWidth;H=c.height=innerHeight;pts=Array.from({length:Math.min(70,Math.floor(W*H/22000))},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5}))}
+addEventListener("resize",rs);rs();
+(function loop(){x.clearRect(0,0,W,H);
+ for(const a of pts){a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;x.fillStyle="#22d3ee";x.fillRect(a.x,a.y,2,2);
+  for(const b of pts){const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<120){x.strokeStyle=`rgba(34,211,238,${.18*(1-d/120)})`;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}}
+ requestAnimationFrame(loop)})();
+</script>
+</body>
+</html>
